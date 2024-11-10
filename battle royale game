@@ -1,0 +1,123 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
+
+// Player class representing each player in the game
+class Player {
+    private String name;
+    private int health;
+    private boolean alive;
+
+    public Player(String name) {
+        this.name = name;
+        this.health = 100; // Default health value
+        this.alive = true;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public boolean isAlive() {
+        return alive;
+    }
+
+    public void takeDamage(int damage) {
+        health -= damage;
+        if (health <= 0) {
+            health = 0;
+            alive = false;
+            System.out.println(name + " has been eliminated!");
+        } else {
+            System.out.println(name + " now has " + health + " health left.");
+        }
+    }
+
+    public void attack(Player target) {
+        if (!alive) {
+            System.out.println(name + " is already eliminated and can't attack.");
+            return;
+        }
+
+        Random rand = new Random();
+        int damage = rand.nextInt(20) + 1; // Random damage between 1 and 20
+        System.out.println(name + " attacks " + target.getName() + " for " + damage + " damage.");
+        target.takeDamage(damage);
+    }
+}
+
+// BattleRoyale class to manage the game
+public class BattleRoyaleGame {
+    private List<Player> players;
+    private Random rand;
+
+    public BattleRoyaleGame(List<String> playerNames) {
+        players = new ArrayList<>();
+        for (String name : playerNames) {
+            players.add(new Player(name));
+        }
+        rand = new Random();
+    }
+
+    public void startGame() {
+        System.out.println("Battle Royale has begun!");
+
+        while (getAlivePlayers().size() > 1) {
+            Player attacker = getRandomAlivePlayer();
+            Player target;
+            do {
+                target = getRandomAlivePlayer();
+            } while (attacker == target);
+
+            // Attacker attacks target
+            attacker.attack(target);
+
+            // Check if only one player remains
+            if (getAlivePlayers().size() == 1) {
+                Player winner = getAlivePlayers().get(0);
+                System.out.println(winner.getName() + " is the last player standing and wins the game!");
+                break;
+            }
+        }
+    }
+
+    private Player getRandomAlivePlayer() {
+        List<Player> alivePlayers = getAlivePlayers();
+        return alivePlayers.get(rand.nextInt(alivePlayers.size()));
+    }
+
+    private List<Player> getAlivePlayers() {
+        List<Player> alivePlayers = new ArrayList<>();
+        for (Player player : players) {
+            if (player.isAlive()) {
+                alivePlayers.add(player);
+            }
+        }
+        return alivePlayers;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter number of players: ");
+        int numPlayers = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        List<String> playerNames = new ArrayList<>();
+        for (int i = 1; i <= numPlayers; i++) {
+            System.out.println("Enter name for player " + i + ": ");
+            String playerName = scanner.nextLine();
+            playerNames.add(playerName);
+        }
+
+        // Start the battle royale game
+        BattleRoyaleGame game = new BattleRoyaleGame(playerNames);
+        game.startGame();
+
+        scanner.close();
+    }
+}
